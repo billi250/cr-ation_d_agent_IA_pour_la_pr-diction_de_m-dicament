@@ -888,141 +888,115 @@ load_dotenv()
 st.markdown(
     """
     <style>
+    /* =====================================================
+       PATCH FINAL CONTRASTE — à mettre en dernier dans le CSS
+       ===================================================== */
+
     .stApp {
-        background:
-            radial-gradient(circle at top left, rgba(37, 99, 235, 0.10), transparent 28%),
-            radial-gradient(circle at top right, rgba(220, 38, 38, 0.10), transparent 28%),
-            linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+        background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%) !important;
+        color: #0f172a !important;
     }
 
-    .block-container {
-        padding-top: 2.2rem;
-        padding-bottom: 2rem;
-        max-width: 1280px;
+    .main .block-container,
+    section.main,
+    div[data-testid="stAppViewContainer"] {
+        color: #0f172a !important;
     }
 
-    .hero {
-        padding: 2.2rem 2.2rem;
-        border-radius: 1.6rem;
-        background: linear-gradient(135deg, #0f172a 0%, #1e293b 52%, #7f1d1d 100%);
-        border: 1px solid rgba(255,255,255,0.14);
-        margin-bottom: 1.4rem;
-        box-shadow: 0 22px 48px rgba(15, 23, 42, 0.24);
+    /* Force le texte foncé dans la zone centrale */
+    div[data-testid="stAppViewContainer"] p,
+    div[data-testid="stAppViewContainer"] span,
+    div[data-testid="stAppViewContainer"] label,
+    div[data-testid="stAppViewContainer"] div,
+    div[data-testid="stAppViewContainer"] h1,
+    div[data-testid="stAppViewContainer"] h2,
+    div[data-testid="stAppViewContainer"] h3,
+    div[data-testid="stAppViewContainer"] h4 {
+        color: #0f172a !important;
     }
 
-    .hero-title {
-        font-size: 2.7rem;
-        font-weight: 900;
-        color: white;
-        margin-bottom: 0.45rem;
-        line-height: 1.08;
+    /* Sauf le header rouge/bleu : on garde son texte blanc */
+    .hero,
+    .hero *,
+    .badge,
+    .badge * {
+        color: #ffffff !important;
     }
 
-    .hero-subtitle {
-        color: #e5e7eb;
-        font-size: 1.05rem;
-        max-width: 900px;
-        line-height: 1.6;
-    }
-
-    .badge-row {
-        margin-top: 1rem;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.6rem;
-    }
-
-    .badge {
-        padding: 0.38rem 0.78rem;
-        border-radius: 999px;
-        background: rgba(255,255,255,0.13);
-        color: #f9fafb;
-        border: 1px solid rgba(255,255,255,0.2);
-        font-size: 0.82rem;
-        font-weight: 700;
-    }
-
-    .warning-box {
-        padding: 1rem 1.1rem;
-        border-radius: 1rem;
-        background-color: #fff7ed;
-        border: 1px solid #fed7aa;
-        color: #9a3412;
-        margin-bottom: 1.2rem;
-        font-weight: 600;
-    }
-
-    .feature-card {
-        padding: 1.2rem;
-        border-radius: 1.2rem;
-        border: 1px solid rgba(148, 163, 184, 0.25);
-        background: rgba(255,255,255,0.72);
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-        min-height: 150px;
-    }
-
-    .answer-box {
-        padding: 1.4rem;
-        border-radius: 1.2rem;
-        border: 1px solid rgba(34, 197, 94, 0.25);
-        background: rgba(236, 253, 245, 0.75);
-        margin-top: 0.8rem;
-        box-shadow: 0 12px 28px rgba(34, 197, 94, 0.08);
-    }
-
-    .source-card {
-        padding: 1rem;
-        border-radius: 0.9rem;
-        border: 1px solid rgba(148, 163, 184, 0.25);
-        background: rgba(15, 23, 42, 0.04);
-        margin-bottom: 0.7rem;
-    }
-
-    .small-muted {
-        color: #6b7280;
-        font-size: 0.9rem;
-    }
-
-    .footer-note {
-        color: #6b7280;
-        font-size: 0.85rem;
-        text-align: center;
-        margin-top: 2rem;
-    }
-
+    /* Cartes statistiques visibles */
+    .metric-card,
+    .stat-card,
+    .card,
+    .feature-card,
     div[data-testid="stMetric"] {
-        background: rgba(255,255,255,0.72);
-        border: 1px solid rgba(148, 163, 184, 0.22);
-        padding: 1rem;
-        border-radius: 1rem;
-        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+        background: #ffffff !important;
+        color: #0f172a !important;
+        border: 1px solid #dbe3ef !important;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08) !important;
     }
 
-    div.stButton > button {
-        border-radius: 0.9rem;
-        font-weight: 800;
-        height: 3rem;
+    .metric-card *,
+    .stat-card *,
+    .card *,
+    .feature-card *,
+    div[data-testid="stMetric"] *,
+    div[data-testid="stMetric"] label,
+    div[data-testid="stMetric"] label p,
+    div[data-testid="stMetricValue"],
+    div[data-testid="stMetricValue"] * {
+        color: #0f172a !important;
     }
 
-    textarea, input {
-        border-radius: 1rem !important;
-    }
-
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 0.4rem;
-    }
-
+    /* Onglets visibles */
     .stTabs [data-baseweb="tab"] {
-        border-radius: 999px;
-        padding-left: 1rem;
-        padding-right: 1rem;
-        background: rgba(255,255,255,0.65);
+        background: #ffffff !important;
+        border: 1px solid #dbe3ef !important;
+        border-radius: 999px !important;
+    }
+
+    .stTabs [data-baseweb="tab"] p,
+    .stTabs [data-baseweb="tab"] span,
+    .stTabs [data-baseweb="tab"] div {
+        color: #334155 !important;
+        font-weight: 800 !important;
+    }
+
+    .stTabs [aria-selected="true"] {
+        background: #fee2e2 !important;
+        border-color: #ef4444 !important;
+    }
+
+    .stTabs [aria-selected="true"] p,
+    .stTabs [aria-selected="true"] span,
+    .stTabs [aria-selected="true"] div {
+        color: #dc2626 !important;
+    }
+
+    /* Titres de sections */
+    h1, h2, h3 {
+        color: #0f172a !important;
+    }
+
+    /* Alertes */
+    .warning-box,
+    .warning-box * {
+        color: #9a3412 !important;
+    }
+
+    /* Sidebar : garder texte blanc uniquement dans la sidebar */
+    section[data-testid="stSidebar"],
+    section[data-testid="stSidebar"] * {
+        color: #f8fafc !important;
+    }
+
+    section[data-testid="stSidebar"] .stSuccess,
+    section[data-testid="stSidebar"] .stSuccess * {
+        color: #22c55e !important;
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
-
 # ============================================================
 # Chargement ressources
 # ============================================================
