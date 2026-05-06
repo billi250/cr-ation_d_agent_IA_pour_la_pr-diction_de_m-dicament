@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # TP RAG — Sujet 2 : Assistant Médicaments avec Python, FAISS et Groq
 
 Ce projet implémente un système **RAG complet** pour répondre à des questions sur des médicaments à partir d'une base de connaissances locale.
@@ -312,3 +313,6 @@ python test_install.py
 python indexation.py
 python rag.py
 ```
+=======
+# cr-ation_d_agent_IA_pour_la_pr-diction_de_m-dicament
+>>>>>>> 912eac4653359e1f6adfdc31a691168e1fb0ae69
