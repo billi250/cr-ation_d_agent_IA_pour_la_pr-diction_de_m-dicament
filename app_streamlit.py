@@ -4,6 +4,7 @@ import json
 import os
 import re
 import unicodedata
+from datetime import datetime
 from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any
@@ -83,7 +84,6 @@ def nettoyer_affichage(text: Any, max_len: int = 160) -> str:
         return "Non renseigné"
 
     text = str(text)
-
     text = re.sub(r"<[^>]+>", " ", text)
 
     text = (
@@ -115,6 +115,36 @@ def lien_bdpm(cis: str) -> str:
     return BDPM_BASE_URL.format(cis=cis_clean)
 
 
+def formater_reponse_telechargement(question: str, reponse: str, chunks: list[dict[str, Any]]) -> str:
+    lignes = [
+        "Assistant RAG Médicaments",
+        "=" * 40,
+        f"Date : {datetime.now().strftime('%d/%m/%Y %H:%M')}",
+        "",
+        "Question :",
+        question,
+        "",
+        "Réponse :",
+        reponse,
+        "",
+        "Sources récupérées :",
+    ]
+
+    for i, chunk in enumerate(chunks, start=1):
+        meta = chunk.get("metadata", {})
+        medicament = nettoyer_affichage(meta.get("medicament", "Médicament inconnu"), 220)
+        section = nettoyer_affichage(meta.get("section", "Section inconnue"), 130)
+        cis = nettoyer_affichage(meta.get("cis", "CIS inconnu"), 40)
+        score = float(chunk.get("score", 0.0))
+        url = lien_bdpm(cis)
+
+        lignes.append(f"{i}. {medicament} — {section} — CIS {cis} — score {score:.3f}")
+        if url:
+            lignes.append(f"   Lien : {url}")
+
+    return "\n".join(lignes)
+
+
 # ============================================================
 # Intention de la question
 # ============================================================
@@ -135,6 +165,17 @@ def intention_question(question: str) -> str:
         return "interactions"
 
     return "general"
+
+
+def libelle_intention(intention: str) -> str:
+    labels = {
+        "effets_indesirables": "Effets indésirables",
+        "posologie": "Posologie",
+        "contre_indications": "Contre-indications",
+        "interactions": "Interactions",
+        "general": "Information générale",
+    }
+    return labels.get(intention, "Information générale")
 
 
 def enrichir_question_pour_recherche(question: str) -> str:
@@ -214,8 +255,8 @@ def charger_modele_embedding() -> SentenceTransformer:
 def charger_index_et_chunks() -> tuple[faiss.Index, list[dict[str, Any]]]:
     if not INDEX_PATH.exists() or not CHUNKS_PATH.exists():
         raise FileNotFoundError(
-            "Base vectorielle introuvable. Lance d'abord : "
-            "python indexation.py --corpus data/medicaments_corpus_bdpm.json"
+            "Base vectorielle introuvable. Vérifie que le dossier storage contient "
+            "medicaments.index et chunks_medicaments.json."
         )
 
     index = faiss.read_index(str(INDEX_PATH))
@@ -484,6 +525,7 @@ st.set_page_config(
     page_title="Assistant RAG Médicaments",
     page_icon="💊",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
 
 load_dotenv()
@@ -491,39 +533,261 @@ load_dotenv()
 st.markdown(
     """
     <style>
-    .main-title {
-        font-size: 2.5rem;
-        font-weight: 800;
-        margin-bottom: 0.2rem;
+    .block-container {
+        padding-top: 2.4rem;
+        padding-bottom: 2rem;
+        max-width: 1250px;
     }
-    .subtitle {
-        color: #6b7280;
+
+    .hero {
+        padding: 2rem 2rem;
+        border-radius: 1.4rem;
+        background: linear-gradient(135deg, #111827 0%, #1f2937 50%, #991b1b 100%);
+        border: 1px solid rgba(255,255,255,0.12);
+        margin-bottom: 1.4rem;
+        box-shadow: 0 20px 45px rgba(0,0,0,0.22);
+    }
+
+    .hero-title {
+        font-size: 2.6rem;
+        font-weight: 900;
+        color: white;
+        margin-bottom: 0.4rem;
+        line-height: 1.1;
+    }
+
+    .hero-subtitle {
+        color: #e5e7eb;
         font-size: 1.05rem;
-        margin-bottom: 1.5rem;
+        max-width: 850px;
+        line-height: 1.6;
     }
+
+    .badge-row {
+        margin-top: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+    }
+
+    .badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.12);
+        color: #f9fafb;
+        border: 1px solid rgba(255,255,255,0.18);
+        font-size: 0.82rem;
+        font-weight: 600;
+    }
+
     .warning-box {
-        padding: 1rem;
-        border-radius: 0.8rem;
+        padding: 1rem 1.1rem;
+        border-radius: 1rem;
         background-color: #fff7ed;
         border: 1px solid #fed7aa;
         color: #9a3412;
+        margin-bottom: 1.2rem;
+        font-weight: 500;
+    }
+
+    .glass-card {
+        padding: 1.2rem;
+        border-radius: 1.1rem;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        background: rgba(255,255,255,0.03);
         margin-bottom: 1rem;
     }
-    .info-box {
+
+    .source-card {
         padding: 1rem;
-        border-radius: 0.8rem;
-        background-color: #f8fafc;
-        border: 1px solid #e5e7eb;
-        margin-bottom: 1rem;
+        border-radius: 0.9rem;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        background: rgba(15, 23, 42, 0.04);
+        margin-bottom: 0.7rem;
+    }
+
+    .small-muted {
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+
+    .answer-box {
+        padding: 1.4rem;
+        border-radius: 1.2rem;
+        border: 1px solid rgba(34, 197, 94, 0.25);
+        background: rgba(34, 197, 94, 0.04);
+        margin-top: 0.8rem;
+    }
+
+    .footer-note {
+        color: #6b7280;
+        font-size: 0.85rem;
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    div[data-testid="stMetric"] {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        padding: 1rem;
+        border-radius: 1rem;
+    }
+
+    div.stButton > button {
+        border-radius: 0.9rem;
+        font-weight: 700;
+        height: 3rem;
+    }
+
+    textarea {
+        border-radius: 1rem !important;
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-st.markdown('<div class="main-title">💊 Assistant RAG Médicaments</div>', unsafe_allow_html=True)
+# ============================================================
+# Chargement ressources
+# ============================================================
+
+try:
+    index, chunks_avec_meta = charger_index_et_chunks()
+    modele = charger_modele_embedding()
+except Exception as e:
+    st.error(str(e))
+    st.stop()
+
+cfg = charger_config()
+
+# ============================================================
+# Sidebar
+# ============================================================
+
+with st.sidebar:
+    st.markdown("## 🧭 Navigation")
+    st.caption("Assistant basé sur une base vectorielle FAISS construite depuis la BDPM.")
+
+    api_key = os.getenv("GROQ_API_KEY", "") or st.secrets.get("GROQ_API_KEY", "")
+    model_name = os.getenv("GROQ_MODEL", "") or st.secrets.get("GROQ_MODEL", DEFAULT_GROQ_MODEL)
+
+    if api_key:
+        st.success("Service IA connecté")
+    else:
+        st.error("Clé Groq manquante")
+
+    st.divider()
+
+    st.markdown("## 📦 Base de connaissances")
+
+    if cfg:
+        st.success("Base vectorielle chargée")
+        st.metric("Documents indexés", cfg.get("nb_chunks", index.ntotal))
+        st.caption("Source : BDPM — Base de Données Publique des Médicaments")
+
+        with st.expander("Voir les informations techniques"):
+            st.write(f"**Modèle embedding :** `{cfg.get('embedding_model', EMBEDDING_MODEL_NAME)}`")
+            st.write(f"**Index FAISS :** `{index.ntotal}` vecteurs")
+            st.write(f"**Modèle Groq :** `{model_name}`")
+            st.write("**Corpus :** BDPM officielle")
+    else:
+        st.info("Configuration de l’index non trouvée.")
+        st.metric("Documents indexés", index.ntotal)
+
+    st.divider()
+
+    st.markdown("## 🧪 Questions rapides")
+
+    exemples = [
+        "Quels sont les effets indésirables de l’amoxicilline ?",
+        "Quelle est la posologie de l’amoxicilline ?",
+        "Quelles sont les contre-indications de l’ibuprofène ?",
+        "Quels sont les effets indésirables du Doliprane ?",
+        "Puis-je prendre Doliprane et ibuprofène en même temps ?",
+    ]
+
+    for ex in exemples:
+        if st.button(ex, use_container_width=True):
+            st.session_state["question"] = ex
+            st.rerun()
+
+    st.divider()
+
+    with st.expander("⚙️ Paramètres avancés"):
+        top_k = st.slider(
+            "Nombre de sources FAISS",
+            min_value=3,
+            max_value=12,
+            value=TOP_K_DEFAULT,
+            step=1,
+            help="Plus cette valeur est grande, plus le contexte est riche, mais plus il consomme de tokens.",
+        )
+
+        seuil_confiance = st.slider(
+            "Seuil de confiance",
+            min_value=0.20,
+            max_value=0.80,
+            value=SEUIL_CONFIANCE_DEFAULT,
+            step=0.01,
+        )
+
+        max_chars_source = st.slider(
+            "Taille max par source",
+            min_value=700,
+            max_value=3000,
+            value=1600,
+            step=100,
+            help="Réduis cette valeur si Groq affiche une erreur de tokens.",
+        )
+
+        max_tokens = st.slider(
+            "Longueur max réponse",
+            min_value=300,
+            max_value=900,
+            value=600,
+            step=50,
+        )
+
+    st.divider()
+
+    st.markdown("## 🛡️ Sécurité")
+    st.caption(
+        "Le système utilise uniquement les sources récupérées par FAISS. "
+        "Il refuse de répondre si le contexte est insuffisant."
+    )
+
+
+client = Groq(api_key=api_key) if api_key else None
+
+if "question" not in st.session_state:
+    st.session_state["question"] = ""
+
+if "historique" not in st.session_state:
+    st.session_state["historique"] = []
+
+
+# ============================================================
+# Header principal
+# ============================================================
+
 st.markdown(
-    '<div class="subtitle">Interface Streamlit basée sur BDPM, FAISS, sentence-transformers et Groq.</div>',
+    """
+    <div class="hero">
+        <div class="hero-title">💊 Assistant RAG Médicaments</div>
+        <div class="hero-subtitle">
+            Pose une question sur un médicament. L’assistant recherche les passages pertinents
+            dans la base officielle BDPM, récupère les sources avec FAISS, puis génère une réponse
+            contrôlée avec Groq.
+        </div>
+        <div class="badge-row">
+            <span class="badge">BDPM officielle</span>
+            <span class="badge">FAISS</span>
+            <span class="badge">Sentence Transformers</span>
+            <span class="badge">Groq LLM</span>
+            <span class="badge">Anti-hallucination</span>
+        </div>
+    </div>
+    """,
     unsafe_allow_html=True,
 )
 
@@ -537,121 +801,41 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+col_a, col_b, col_c = st.columns(3)
+col_a.metric("Sources disponibles", index.ntotal)
+col_b.metric("Base", "BDPM")
+col_c.metric("Mode", "RAG contrôlé")
 
-# ============================================================
-# Sidebar
-# ============================================================
-
-with st.sidebar:
-    st.header("⚙️ Configuration")
-
-    api_key = os.getenv("GROQ_API_KEY", "") or st.secrets.get("GROQ_API_KEY", "")
-    model_name = os.getenv("GROQ_MODEL", "") or st.secrets.get("GROQ_MODEL", DEFAULT_GROQ_MODEL)
-
-    if api_key:
-        st.success("Clé Groq chargée")
-    else:
-        st.error("GROQ_API_KEY manquante dans le fichier .env")
-
-    top_k = st.slider(
-        "Nombre de sources FAISS",
-        min_value=3,
-        max_value=12,
-        value=TOP_K_DEFAULT,
-        step=1,
-        help="Plus cette valeur est grande, plus le contexte est riche, mais plus il consomme de tokens.",
-    )
-
-    seuil_confiance = st.slider(
-        "Seuil de confiance",
-        min_value=0.20,
-        max_value=0.80,
-        value=SEUIL_CONFIANCE_DEFAULT,
-        step=0.01,
-    )
-
-    max_chars_source = st.slider(
-        "Taille max par source",
-        min_value=700,
-        max_value=3000,
-        value=1600,
-        step=100,
-        help="Réduis cette valeur si Groq affiche une erreur de tokens.",
-    )
-
-    max_tokens = st.slider(
-        "Longueur max réponse",
-        min_value=300,
-        max_value=900,
-        value=600,
-        step=50,
-    )
-
-    st.divider()
-
-    st.subheader("📦 Index FAISS")
-
-    cfg = charger_config()
-
-    if cfg:
-        st.write(f"**Modèle embedding :** `{cfg.get('embedding_model', EMBEDDING_MODEL_NAME)}`")
-        st.write(f"**Chunks indexés :** `{cfg.get('nb_chunks', 'inconnu')}`")
-        st.write(f"**Corpus :** `{Path(str(cfg.get('corpus_path', ''))).name}`")
-    else:
-        st.info("Aucune configuration trouvée.")
-
-    st.divider()
-
-    st.subheader("🧪 Exemples")
-
-    exemples = [
-        "Quels sont les effets indésirables de l’amoxicilline ?",
-        "Quelle est la posologie de l’amoxicilline ?",
-        "Quelles sont les contre-indications de l’ibuprofène ?",
-        "Quels sont les effets indésirables du Doliprane ?",
-        "Puis-je prendre Doliprane et ibuprofène en même temps ?",
-    ]
-
-    for ex in exemples:
-        if st.button(ex, use_container_width=True):
-            st.session_state["question"] = ex
-
-
-# ============================================================
-# Chargement ressources
-# ============================================================
-
-try:
-    index, chunks_avec_meta = charger_index_et_chunks()
-    modele = charger_modele_embedding()
-except Exception as e:
-    st.error(str(e))
-    st.stop()
-
-client = Groq(api_key=api_key) if api_key else None
-
-if "question" not in st.session_state:
-    st.session_state["question"] = ""
+st.divider()
 
 
 # ============================================================
 # Zone question
 # ============================================================
 
+st.markdown("### 🔎 Interroger la base médicamenteuse")
+
 question = st.text_area(
     "Pose ta question",
     value=st.session_state["question"],
     placeholder="Exemple : Quels sont les effets indésirables de l’amoxicilline ?",
-    height=120,
+    height=130,
 )
 
-col_btn1, col_btn2 = st.columns([1, 4])
+intention_detectee = intention_question(question) if question.strip() else "general"
+
+st.caption(f"Intention détectée : **{libelle_intention(intention_detectee)}**")
+
+col_btn1, col_btn2, col_btn3 = st.columns([1.4, 1.2, 4])
 
 with col_btn1:
     lancer = st.button("🔎 Interroger", type="primary", use_container_width=True)
 
 with col_btn2:
     effacer = st.button("🧹 Effacer", use_container_width=True)
+
+with col_btn3:
+    st.write("")
 
 if effacer:
     st.session_state["question"] = ""
@@ -668,10 +852,12 @@ if lancer:
         st.stop()
 
     if client is None:
-        st.error("GROQ_API_KEY manquante. Vérifie ton fichier .env.")
+        st.error("GROQ_API_KEY manquante. Ajoute la clé dans le fichier .env en local ou dans les Secrets Streamlit Cloud.")
         st.stop()
 
-    with st.spinner("Recherche des sources pertinentes avec FAISS..."):
+    st.session_state["question"] = question
+
+    with st.spinner("Recherche sémantique des sources pertinentes avec FAISS..."):
         chunks = rechercher(
             question=question,
             modele=modele,
@@ -686,14 +872,15 @@ if lancer:
 
     best_score = max(c.get("score", 0.0) for c in chunks)
 
-    col1, col2, col3 = st.columns(3)
+    st.markdown("### 📊 Résultat de la recherche")
+
+    col1, col2, col3, col4 = st.columns(4)
     col1.metric("Sources récupérées", len(chunks))
-    col2.metric("Meilleur score FAISS", f"{best_score:.3f}")
-    col3.metric("Chunks indexés", index.ntotal)
+    col2.metric("Meilleur score", f"{best_score:.3f}")
+    col3.metric("Intention", libelle_intention(intention_detectee))
+    col4.metric("Chunks indexés", index.ntotal)
 
-    st.divider()
-
-    with st.spinner("Génération de la réponse avec Groq..."):
+    with st.spinner("Génération de la réponse contrôlée avec Groq..."):
         try:
             reponse = generer_reponse(
                 question=question,
@@ -708,16 +895,43 @@ if lancer:
             st.error("Erreur pendant l’appel Groq.")
             st.exception(e)
             st.info(
-                "Essaie de diminuer le nombre de sources FAISS ou la taille max par source dans la barre latérale."
+                "Essaie de diminuer le nombre de sources FAISS ou la taille maximale par source dans les paramètres avancés."
             )
             st.stop()
 
-    st.subheader("🤖 Réponse")
+    st.markdown("### 🤖 Réponse de l’assistant")
+
+    st.markdown('<div class="answer-box">', unsafe_allow_html=True)
     st.markdown(reponse)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    export_txt = formater_reponse_telechargement(question, reponse, chunks)
+
+    st.download_button(
+        label="📥 Télécharger la réponse et les sources",
+        data=export_txt,
+        file_name="reponse_rag_medicaments.txt",
+        mime="text/plain",
+        use_container_width=True,
+    )
+
+    st.session_state["historique"].insert(
+        0,
+        {
+            "question": question,
+            "reponse": reponse,
+            "date": datetime.now().strftime("%d/%m/%Y %H:%M"),
+            "score": best_score,
+        },
+    )
 
     st.divider()
 
-    st.subheader("📚 Sources récupérées par FAISS")
+    st.markdown("### 📚 Sources officielles récupérées")
+
+    st.caption(
+        "Les sources ci-dessous sont les passages récupérés par FAISS avant la génération de la réponse."
+    )
 
     for i, chunk in enumerate(chunks, start=1):
         meta = chunk.get("metadata", {})
@@ -732,14 +946,19 @@ if lancer:
         titre = f"{i}. {medicament} — {section} — score {score:.3f}"
 
         with st.expander(titre, expanded=i <= 3):
-            st.markdown(f"**Médicament :** {medicament}")
-            st.markdown(f"**Section :** {section}")
-            st.markdown(f"**Code CIS :** `{cis}`")
-            st.markdown(f"**Substance active :** {substance}")
-            st.markdown(f"**Score FAISS :** `{score:.3f}`")
+            col_s1, col_s2 = st.columns([2, 1])
 
-            if url:
-                st.markdown(f"[🔗 Ouvrir la fiche officielle BDPM]({url})")
+            with col_s1:
+                st.markdown(f"**Médicament :** {medicament}")
+                st.markdown(f"**Section RCP :** {section}")
+                st.markdown(f"**Substance active :** {substance}")
+
+            with col_s2:
+                st.markdown(f"**Code CIS :** `{cis}`")
+                st.markdown(f"**Score FAISS :** `{score:.3f}`")
+
+                if url:
+                    st.link_button("🔗 Fiche officielle BDPM", url, use_container_width=True)
 
             extrait = extraire_extrait_pertinent(
                 contenu=chunk.get("contenu", ""),
@@ -754,3 +973,33 @@ if lancer:
                 height=180,
                 label_visibility="collapsed",
             )
+
+
+# ============================================================
+# Historique
+# ============================================================
+
+if st.session_state["historique"]:
+    st.divider()
+    st.markdown("### 🕘 Historique de la session")
+
+    for item in st.session_state["historique"][:5]:
+        with st.expander(f"{item['date']} — {item['question']}"):
+            st.markdown(f"**Score max FAISS :** `{item['score']:.3f}`")
+            st.markdown(item["reponse"])
+
+
+# ============================================================
+# Pied de page
+# ============================================================
+
+st.markdown(
+    """
+    <div class="footer-note">
+        Projet RAG Médicaments — BDPM + FAISS + Sentence Transformers + Groq.
+        <br>
+        Usage pédagogique uniquement. Ne remplace pas un avis médical.
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
