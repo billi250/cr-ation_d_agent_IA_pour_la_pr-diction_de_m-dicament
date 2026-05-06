@@ -1,0 +1,36 @@
+# Environnement virtuel Python
+venv/
+.venv/
+env/
+
+# Clé API / variables secrètes
+.env
+.env.local
+*.env
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Fichiers générés FAISS / index
+storage/
+*.index
+*.faiss
+*.bin
+
+# Données BDPM lourdes ou générées
+data/bdpm_raw/
+data/*.zip
+data/*.csv
+data/*.txt
+data/medicaments_corpus_bdpm.json
+
+# Système
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
