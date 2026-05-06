@@ -1,0 +1,8 @@
+{
+  "embedding_model": "paraphrase-multilingual-mpnet-base-v2",
+  "corpus_path": "C:\\Users\\lenovo\\OneDrive\\Bureau\\rag_medicaments_tp\\data\\medicaments_corpus_bdpm.json",
+  "chunk_size": 900,
+  "chunk_overlap": 150,
+  "nb_chunks": 14407,
+  "faiss_index": "IndexFlatIP avec embeddings normalisés = similarité cosinus"
+}
