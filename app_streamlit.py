@@ -888,115 +888,301 @@ load_dotenv()
 st.markdown(
     """
     <style>
-    /* =====================================================
-       PATCH FINAL CONTRASTE — à mettre en dernier dans le CSS
-       ===================================================== */
+    /* ============================================================
+       STYLE FINAL STABLE — clair, propre, sans texte invisible
+       ============================================================ */
 
     .stApp {
-        background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%) !important;
+        background:
+            radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 30%),
+            radial-gradient(circle at top right, rgba(220, 38, 38, 0.08), transparent 30%),
+            linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%) !important;
         color: #0f172a !important;
     }
 
-    .main .block-container,
-    section.main,
-    div[data-testid="stAppViewContainer"] {
-        color: #0f172a !important;
+    .block-container {
+        padding-top: 2.2rem;
+        padding-bottom: 2rem;
+        max-width: 1280px;
     }
 
-    /* Force le texte foncé dans la zone centrale */
-    div[data-testid="stAppViewContainer"] p,
-    div[data-testid="stAppViewContainer"] span,
-    div[data-testid="stAppViewContainer"] label,
-    div[data-testid="stAppViewContainer"] div,
-    div[data-testid="stAppViewContainer"] h1,
-    div[data-testid="stAppViewContainer"] h2,
-    div[data-testid="stAppViewContainer"] h3,
-    div[data-testid="stAppViewContainer"] h4 {
-        color: #0f172a !important;
+    /* Texte principal lisible */
+    .block-container h1,
+    .block-container h2,
+    .block-container h3,
+    .block-container h4,
+    .block-container p,
+    .block-container li,
+    .block-container label,
+    .block-container span {
+        color: #0f172a;
     }
 
-    /* Sauf le header rouge/bleu : on garde son texte blanc */
-    .hero,
-    .hero *,
-    .badge,
-    .badge * {
+    /* Header */
+    .hero {
+        padding: 2.2rem 2.2rem;
+        border-radius: 1.6rem;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 52%, #7f1d1d 100%) !important;
+        border: 1px solid rgba(255,255,255,0.14);
+        margin-bottom: 1.4rem;
+        box-shadow: 0 22px 48px rgba(15, 23, 42, 0.24);
+    }
+
+    .hero-title {
+        font-size: 2.7rem;
+        font-weight: 900;
+        color: #ffffff !important;
+        margin-bottom: 0.45rem;
+        line-height: 1.08;
+    }
+
+    .hero-subtitle {
+        color: #e5e7eb !important;
+        font-size: 1.05rem;
+        max-width: 900px;
+        line-height: 1.6;
+    }
+
+    .badge-row {
+        margin-top: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+    }
+
+    .badge {
+        padding: 0.38rem 0.78rem;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.13);
+        color: #f9fafb !important;
+        border: 1px solid rgba(255,255,255,0.2);
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+
+    .hero *, .badge * {
         color: #ffffff !important;
     }
 
-    /* Cartes statistiques visibles */
-    .metric-card,
-    .stat-card,
-    .card,
-    .feature-card,
-    div[data-testid="stMetric"] {
-        background: #ffffff !important;
-        color: #0f172a !important;
-        border: 1px solid #dbe3ef !important;
-        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08) !important;
+    /* Encadré médical */
+    .warning-box {
+        padding: 1rem 1.1rem;
+        border-radius: 1rem;
+        background-color: #fff7ed;
+        border: 1px solid #fed7aa;
+        color: #9a3412 !important;
+        margin-bottom: 1.2rem;
+        font-weight: 650;
     }
 
-    .metric-card *,
-    .stat-card *,
-    .card *,
-    .feature-card *,
-    div[data-testid="stMetric"] *,
-    div[data-testid="stMetric"] label,
-    div[data-testid="stMetric"] label p,
-    div[data-testid="stMetricValue"],
-    div[data-testid="stMetricValue"] * {
-        color: #0f172a !important;
-    }
-
-    /* Onglets visibles */
-    .stTabs [data-baseweb="tab"] {
-        background: #ffffff !important;
-        border: 1px solid #dbe3ef !important;
-        border-radius: 999px !important;
-    }
-
-    .stTabs [data-baseweb="tab"] p,
-    .stTabs [data-baseweb="tab"] span,
-    .stTabs [data-baseweb="tab"] div {
-        color: #334155 !important;
-        font-weight: 800 !important;
-    }
-
-    .stTabs [aria-selected="true"] {
-        background: #fee2e2 !important;
-        border-color: #ef4444 !important;
-    }
-
-    .stTabs [aria-selected="true"] p,
-    .stTabs [aria-selected="true"] span,
-    .stTabs [aria-selected="true"] div {
-        color: #dc2626 !important;
-    }
-
-    /* Titres de sections */
-    h1, h2, h3 {
-        color: #0f172a !important;
-    }
-
-    /* Alertes */
-    .warning-box,
     .warning-box * {
         color: #9a3412 !important;
     }
 
-    /* Sidebar : garder texte blanc uniquement dans la sidebar */
-    section[data-testid="stSidebar"],
-    section[data-testid="stSidebar"] * {
+    /* Cartes */
+    .feature-card {
+        padding: 1.2rem;
+        border-radius: 1.2rem;
+        border: 1px solid rgba(148, 163, 184, 0.30);
+        background: rgba(255,255,255,0.88);
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+        min-height: 150px;
+    }
+
+    .feature-card, .feature-card * {
+        color: #0f172a !important;
+    }
+
+    .feature-card p, .small-muted {
+        color: #64748b !important;
+    }
+
+    .answer-box {
+        padding: 1.4rem;
+        border-radius: 1.2rem;
+        border: 1px solid rgba(34, 197, 94, 0.25);
+        background: rgba(236, 253, 245, 0.92);
+        margin-top: 0.8rem;
+        box-shadow: 0 12px 28px rgba(34, 197, 94, 0.08);
+    }
+
+    .answer-box, .answer-box * {
+        color: #064e3b !important;
+    }
+
+    .source-card {
+        padding: 1rem;
+        border-radius: 0.9rem;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+        background: rgba(255,255,255,0.88);
+        margin-bottom: 0.7rem;
+    }
+
+    .source-card, .source-card * {
+        color: #0f172a !important;
+    }
+
+    .footer-note {
+        color: #64748b !important;
+        font-size: 0.85rem;
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    /* Métriques visibles */
+    .block-container div[data-testid="stMetric"] {
+        background: rgba(255,255,255,0.92) !important;
+        border: 1px solid rgba(148, 163, 184, 0.28) !important;
+        padding: 1rem !important;
+        border-radius: 1rem !important;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05) !important;
+    }
+
+    .block-container div[data-testid="stMetric"] *,
+    .block-container div[data-testid="stMetricValue"] *,
+    .block-container div[data-testid="stMetricLabel"] * {
+        color: #0f172a !important;
+    }
+
+    .block-container div[data-testid="stMetricLabel"] * {
+        color: #64748b !important;
+        font-weight: 700 !important;
+    }
+
+    /* Boutons */
+    div.stButton > button,
+    div.stDownloadButton > button,
+    div[data-testid="stLinkButton"] > a {
+        border-radius: 0.9rem !important;
+        font-weight: 800 !important;
+        min-height: 3rem;
+    }
+
+    div.stButton > button[kind="primary"],
+    div.stButton > button[data-testid="baseButton-primary"] {
+        background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        box-shadow: 0 10px 22px rgba(220, 38, 38, 0.22);
+    }
+
+    div.stButton > button[kind="primary"] *,
+    div.stButton > button[data-testid="baseButton-primary"] * {
+        color: #ffffff !important;
+    }
+
+    /* Inputs et selectbox : texte lisible */
+    textarea, input {
+        border-radius: 1rem !important;
+        color: #0f172a !important;
+        background: #ffffff !important;
+    }
+
+    div[data-baseweb="select"] > div {
+        background: #ffffff !important;
+        border-radius: 0.9rem !important;
+        color: #0f172a !important;
+    }
+
+    div[data-baseweb="select"] span,
+    div[data-baseweb="select"] div {
+        color: #0f172a !important;
+    }
+
+    /* Onglets visibles */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 0.55rem;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 999px;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        background: rgba(255,255,255,0.88) !important;
+        border: 1px solid rgba(148, 163, 184, 0.28);
+    }
+
+    .stTabs [data-baseweb="tab"] p,
+    .stTabs [data-baseweb="tab"] span {
+        color: #334155 !important;
+        font-weight: 800 !important;
+    }
+
+    .stTabs [data-baseweb="tab"][aria-selected="true"] {
+        background: #fee2e2 !important;
+        border-color: #ef4444 !important;
+    }
+
+    .stTabs [data-baseweb="tab"][aria-selected="true"] p,
+    .stTabs [data-baseweb="tab"][aria-selected="true"] span {
+        color: #dc2626 !important;
+    }
+
+    /* Expanders */
+    div[data-testid="stExpander"] {
+        background: rgba(255,255,255,0.92) !important;
+        border: 1px solid rgba(148, 163, 184, 0.28) !important;
+        border-radius: 0.9rem !important;
+    }
+
+    div[data-testid="stExpander"] summary,
+    div[data-testid="stExpander"] summary * {
+        color: #0f172a !important;
+        font-weight: 750 !important;
+    }
+
+    /* Textarea des extraits : style sombre volontaire et lisible */
+    div[data-testid="stTextArea"] textarea {
+        background: #111827 !important;
+        color: #f8fafc !important;
+        border: 1px solid #334155 !important;
+        font-family: Consolas, Monaco, monospace !important;
+        font-size: 0.9rem !important;
+    }
+
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #111827 0%, #1f2937 100%) !important;
+    }
+
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] div {
         color: #f8fafc !important;
     }
 
-    section[data-testid="stSidebar"] .stSuccess,
-    section[data-testid="stSidebar"] .stSuccess * {
+    section[data-testid="stSidebar"] .stCaptionContainer *,
+    section[data-testid="stSidebar"] small {
+        color: #cbd5e1 !important;
+    }
+
+    section[data-testid="stSidebar"] div[data-testid="stMetric"] {
+        background: rgba(255,255,255,0.08) !important;
+        border: 1px solid rgba(255,255,255,0.12) !important;
+    }
+
+    section[data-testid="stSidebar"] code {
         color: #22c55e !important;
+        background: rgba(15, 23, 42, 0.55) !important;
+    }
+
+    @media (max-width: 768px) {
+        .hero {
+            padding: 1.4rem;
+        }
+        .hero-title {
+            font-size: 2rem;
+        }
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
+
 # ============================================================
 # Chargement ressources
 # ============================================================
@@ -1451,7 +1637,7 @@ with tab_chat:
 
                 with col_s3:
                     if url:
-                        st.link_button("🔗 Fiche BDPM", url, use_container_width=True)
+                        st.link_button("🔗 Fiche BDPM", url, use_container_width=True, key=f"fiche_bdpm_chat_{i}_{cis}")
 
                 extrait = extraire_extrait_pertinent(
                     contenu=chunk.get("contenu", ""),
@@ -1465,6 +1651,7 @@ with tab_chat:
                     value=extrait,
                     height=180,
                     label_visibility="collapsed",
+                    key=f"chat_extrait_source_{i}_{cis}",
                 )
 
 # ============================================================
@@ -1588,12 +1775,13 @@ with tab_comparaison:
             with st.expander(f"{i}. {med} — {sec} — score {score:.3f}", expanded=i <= 2):
                 st.write(f"Code CIS : `{cis}`")
                 if url:
-                    st.link_button("🔗 Fiche BDPM", url)
+                    st.link_button("🔗 Fiche BDPM", url, key=f"fiche_bdpm_compare_{i}_{cis}")
                 st.text_area(
                     "Extrait",
                     extraire_extrait_pertinent(c.get("contenu", ""), question_compare, 900),
                     height=140,
                     label_visibility="collapsed",
+                    key=f"comparaison_extrait_{i}_{cis}",
                 )
 
 # ============================================================
@@ -1652,12 +1840,13 @@ with tab_recherche:
                 st.markdown(f"**Substance :** {substance}")
                 st.markdown(f"**Code CIS :** `{cis}`")
                 if url:
-                    st.link_button("🔗 Fiche officielle BDPM", url)
+                    st.link_button("🔗 Fiche officielle BDPM", url, key=f"fiche_bdpm_recherche_{i}_{cis}")
                 st.text_area(
                     "Extrait",
                     nettoyer_affichage(chunk.get("contenu", ""), 2500),
                     height=160,
                     label_visibility="collapsed",
+                    key=f"recherche_extrait_{i}_{cis}",
                 )
 
 # ============================================================
