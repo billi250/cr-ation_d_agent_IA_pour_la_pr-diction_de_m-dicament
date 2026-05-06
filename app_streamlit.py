@@ -1513,20 +1513,6 @@ with tab_accueil:
             unsafe_allow_html=True,
         )
 
-    st.markdown("### Pipeline utilisé")
-    st.code(
-        """BDPM ZIP/CSV/HTML
-→ Nettoyage HTML avec BeautifulSoup
-→ Extraction des sections RCP
-→ Chunking
-→ Embeddings sentence-transformers
-→ Index FAISS
-→ Recherche hybride FAISS + mots-clés
-→ Contexte contrôlé
-→ Réponse Groq avec sources""",
-        language="text",
-    )
-
     st.markdown("### Comment utiliser l’application ?")
     st.markdown(
         """
