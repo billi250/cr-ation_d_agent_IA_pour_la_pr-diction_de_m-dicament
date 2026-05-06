@@ -545,8 +545,8 @@ st.markdown(
 with st.sidebar:
     st.header("⚙️ Configuration")
 
-    api_key = os.getenv("GROQ_API_KEY", "")
-    model_name = os.getenv("GROQ_MODEL", DEFAULT_GROQ_MODEL)
+    api_key = os.getenv("GROQ_API_KEY", "") or st.secrets.get("GROQ_API_KEY", "")
+    model_name = os.getenv("GROQ_MODEL", "") or st.secrets.get("GROQ_MODEL", DEFAULT_GROQ_MODEL)
 
     if api_key:
         st.success("Clé Groq chargée")
