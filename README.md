@@ -1,62 +1,48 @@
-# TP RAG — Sujet 2 : Assistant Médicaments avec BDPM, FAISS, Groq et Streamlit
+# TP RAG — Assistant Médicaments avec BDPM, FAISS, Groq et Streamlit
 
-Ce projet implémente un système **RAG complet** (*Retrieval-Augmented Generation*) permettant de répondre à des questions sur les médicaments à partir d’une base de connaissances construite avec des données issues de la **Base de Données Publique des Médicaments (BDPM)**.
+Ce projet implémente un système **RAG complet** (*Retrieval-Augmented Generation*) pour répondre à des questions sur les médicaments à partir d’une base de connaissances construite avec des données issues de la **Base de Données Publique des Médicaments (BDPM)**.
 
-Le projet répond au **Sujet 2 : Assistant Médicaments** du TP.
+Le projet correspond au **Sujet 2 : Assistant Médicaments** du TP. Il propose à la fois une version terminal et une interface web professionnelle avec **Streamlit**.
 
-L’objectif est de construire un assistant capable de :
-
-- charger une base documentaire réelle ;
-- nettoyer des fichiers contenant du texte HTML ;
-- structurer les notices de médicaments ;
-- découper les documents en chunks ;
-- calculer des embeddings ;
-- créer une base vectorielle avec FAISS ;
-- récupérer uniquement les passages pertinents ;
-- interroger un LLM via Groq ;
-- citer les sources utilisées ;
-- éviter les hallucinations ;
-- proposer une interface utilisateur avec Streamlit.
-
-> Important : ce projet n’utilise ni LangChain ni LlamaIndex.  
-> Le pipeline RAG est implémenté manuellement en Python.
+> **Important :** ce projet n’utilise ni LangChain ni LlamaIndex. Le pipeline RAG est implémenté manuellement en Python.
 
 ---
 
-## 1. Sujet choisi
+## 1. Objectif du projet
 
-J’ai choisi le **Sujet 2 : Assistant Médicaments**.
-
-Le but est de créer un chatbot capable de répondre à des questions comme :
+L’objectif est de construire un assistant capable de répondre à des questions comme :
 
 ```text
 Quels sont les effets indésirables de l’amoxicilline ?
-```
-
-```text
 Quelle est la posologie de l’amoxicilline ?
-```
-
-```text
 Quelles sont les contre-indications de l’ibuprofène ?
-```
-
-```text
 Quels sont les effets secondaires du Doliprane ?
+Puis-je prendre Doliprane et ibuprofène en même temps ?
 ```
 
-```text
-Puis-je prendre deux médicaments ensemble ?
-```
+L’assistant ne répond pas à partir de ses connaissances générales. Il répond uniquement à partir des sources récupérées dans la base vectorielle FAISS.
 
-L’assistant ne doit pas répondre à partir de ses connaissances générales.  
-Il doit répondre uniquement à partir des sources récupérées dans la base vectorielle.
+Le projet couvre les étapes suivantes :
+
+- chargement d’une base documentaire réelle issue de la BDPM ;
+- lecture de fichiers ZIP, CSV et TXT ;
+- nettoyage du texte contenant du HTML ;
+- extraction des sections médicales utiles ;
+- construction d’un corpus JSON structuré ;
+- découpage en chunks ;
+- calcul des embeddings ;
+- création d’un index FAISS persistant ;
+- recherche sémantique et recherche hybride ;
+- appel du modèle Groq ;
+- génération de réponses sourcées ;
+- affichage des sources officielles ;
+- interface Streamlit déployée en ligne.
 
 ---
 
-## 2. Lien de l’application Streamlit
+## 2. Application en ligne
 
-L’application est déployée en ligne avec **Streamlit Community Cloud**.
+L’application est déployée avec **Streamlit Community Cloud**.
 
 Lien de l’application :
 
@@ -70,9 +56,7 @@ Cette interface permet d’utiliser le RAG comme un vrai chatbot, sans passer pa
 
 ## 3. Avertissement médical
 
-Ce projet est un projet pédagogique.
-
-Les réponses générées ne remplacent jamais l’avis d’un médecin, d’un pharmacien ou d’un professionnel de santé.
+Ce projet est un projet pédagogique. Les réponses générées ne remplacent jamais l’avis d’un médecin, d’un pharmacien ou d’un professionnel de santé.
 
 L’assistant rappelle systématiquement :
 
@@ -85,55 +69,11 @@ Le chatbot ne donne pas de diagnostic médical et ne doit pas être utilisé pou
 
 ---
 
-## 4. Fonctionnement général du RAG
-
-Le fonctionnement du projet suit le pipeline RAG suivant :
-
-```text
-Fichiers BDPM
-    ↓
-Lecture des fichiers ZIP, CSV et TXT
-    ↓
-Détection de l’encodage et du séparateur
-    ↓
-Nettoyage du HTML avec BeautifulSoup
-    ↓
-Extraction des sections utiles du RCP
-    ↓
-Création d’un corpus JSON structuré
-    ↓
-Découpage du corpus en chunks
-    ↓
-Calcul des embeddings avec sentence-transformers
-    ↓
-Création d’un index FAISS
-    ↓
-Recherche des chunks proches de la question
-    ↓
-Construction du contexte
-    ↓
-Envoi du contexte au modèle Groq
-    ↓
-Génération d’une réponse sourcée
-```
-
-Le principe important est que le LLM ne reçoit jamais toute la base de données.  
-Il reçoit uniquement les extraits sélectionnés par FAISS comme étant les plus proches de la question.
-
-Cela permet :
-
-- de réduire la consommation de tokens ;
-- d’éviter de saturer le modèle ;
-- de limiter les hallucinations ;
-- d’obtenir des réponses justifiées par des sources.
-
----
-
-## 5. Source des données
+## 4. Source des données
 
 Les données utilisées proviennent de la **Base de Données Publique des Médicaments (BDPM)**.
 
-Les fichiers utilisés dans ce projet sont principalement :
+Les fichiers utilisés sont principalement :
 
 ```text
 CIS_RCP.zip
@@ -141,12 +81,12 @@ CIS_bdpm_officielle.zip
 CIS_COMPO_bdpm.txt
 ```
 
-Ces fichiers contiennent :
+Ces fichiers permettent de récupérer :
 
 - le code CIS des médicaments ;
 - la dénomination des médicaments ;
-- la composition ;
 - les substances actives ;
+- la composition ;
 - les résumés des caractéristiques du produit ;
 - les indications ;
 - la posologie ;
@@ -159,30 +99,29 @@ Contrairement à une première version basée sur un petit corpus local, cette v
 
 ---
 
-## 6. Problème rencontré avec les fichiers BDPM
+## 5. Problème rencontré avec les fichiers BDPM
 
-Les fichiers BDPM ne sont pas toujours simples à lire directement.
+Les fichiers BDPM ne sont pas directement simples à utiliser dans un système RAG.
 
 Les principaux problèmes rencontrés sont :
 
-- fichiers compressés en `.zip` ;
+- fichiers compressés au format `.zip` ;
 - fichiers `.csv` ou `.txt` volumineux ;
 - encodage parfois en `latin-1` ;
 - encodage parfois en `utf-8-sig` ;
-- séparateur pouvant être une tabulation ;
+- séparateur pouvant être une tabulation, un point-virgule ou une virgule ;
 - contenu médical stocké avec des balises HTML ;
-- très grand nombre de lignes dans `CIS_RCP.csv`.
+- très grand nombre de lignes dans le fichier `CIS_RCP`.
 
-Le fichier RCP peut contenir plusieurs millions de lignes.  
-Il ne faut donc pas le lire naïvement en mémoire sans optimisation.
+Le fichier RCP peut être très lourd. Il ne faut donc pas le lire naïvement en mémoire sans précaution.
 
 ---
 
-## 7. Solution utilisée pour lire les fichiers
+## 6. Solution utilisée pour lire et nettoyer les données
 
-Le script `importer_bdpm.py` gère automatiquement plusieurs cas.
+Le script `importer_bdpm.py` automatise la préparation des données.
 
-### 7.1 Décompression des fichiers ZIP
+### 6.1 Décompression automatique
 
 Les fichiers `.zip` sont automatiquement décompressés dans :
 
@@ -190,21 +129,9 @@ Les fichiers `.zip` sont automatiquement décompressés dans :
 data/bdpm_raw/
 ```
 
-Exemple :
+Cela évite de décompresser manuellement les fichiers BDPM.
 
-```text
-data/CIS_RCP.zip
-```
-
-est décompressé dans :
-
-```text
-data/bdpm_raw/CIS_RCP/
-```
-
-Cela évite à l’utilisateur de décompresser manuellement les fichiers.
-
-### 7.2 Détection de l’encodage
+### 6.2 Détection de l’encodage
 
 Le script teste plusieurs encodages :
 
@@ -214,9 +141,9 @@ utf-8
 latin-1
 ```
 
-Cela permet d’éviter les problèmes de caractères du type `Ã©`, `Ã¨`, `Ãª`, qui apparaissent souvent quand un fichier est lu avec le mauvais encodage.
+Cela permet d’éviter les problèmes de caractères mal lus, par exemple `Ã©`, `Ã¨` ou `Ãª`.
 
-### 7.3 Détection du séparateur
+### 6.3 Détection du séparateur
 
 Le script teste plusieurs séparateurs :
 
@@ -226,38 +153,31 @@ point-virgule
 virgule
 ```
 
-Le meilleur séparateur est choisi en fonction de la structure du tableau obtenu.
+Le séparateur le plus cohérent est ensuite utilisé pour lire correctement le tableau.
 
-### 7.4 Lecture par blocs
+### 6.4 Lecture par blocs
 
-Le fichier `CIS_RCP.csv` est très grand.
+Les fichiers volumineux sont lus progressivement, notamment grâce à `chunksize` avec pandas.
 
-Pour éviter de bloquer le PC, il est lu par blocs avec `chunksize`.
+Cette méthode permet de traiter de grands fichiers sans saturer la mémoire.
 
-Cela permet de traiter progressivement les lignes sans charger tout le fichier en mémoire.
+### 6.5 Nettoyage HTML
 
-### 7.5 Nettoyage du HTML
-
-Le contenu des RCP contient souvent du HTML.
-
-Le projet utilise **BeautifulSoup** pour transformer ce contenu en texte propre.
+Les RCP contiennent souvent du texte avec des balises HTML. Le projet utilise **BeautifulSoup** pour transformer ce contenu en texte exploitable.
 
 Le nettoyage consiste à :
 
 - supprimer les balises HTML ;
-- supprimer les balises `script` et `style` ;
+- supprimer les balises inutiles comme `script` et `style` ;
 - récupérer le texte lisible ;
-- nettoyer les espaces ;
-- normaliser les caractères ;
+- normaliser les espaces ;
 - conserver les sections médicales importantes.
 
 ---
 
-## 8. Sections médicales extraites
+## 7. Sections médicales extraites
 
-Le script extrait les sections importantes du RCP.
-
-Exemples :
+Le script extrait les sections importantes du RCP, par exemple :
 
 ```text
 1 Dénomination du médicament
@@ -276,18 +196,11 @@ Exemples :
 6 Données pharmaceutiques
 ```
 
-Cette structuration est importante, car elle permet au RAG de retrouver plus précisément les informations demandées.
-
-Par exemple :
-
-- une question sur la posologie doit récupérer plutôt la section `4.2` ;
-- une question sur les effets indésirables doit récupérer plutôt la section `4.8` ;
-- une question sur les contre-indications doit récupérer plutôt la section `4.3` ;
-- une question sur les interactions doit récupérer plutôt la section `4.5`.
+Cette structuration améliore la précision du RAG. Par exemple, une question sur la posologie doit prioritairement récupérer la section `4.2`, tandis qu’une question sur les effets indésirables doit récupérer la section `4.8`.
 
 ---
 
-## 9. Architecture du projet
+## 8. Architecture du projet
 
 ```text
 rag_medicaments_tp/
@@ -318,22 +231,22 @@ rag_medicaments_tp/
 
 ---
 
-## 10. Rôle des fichiers principaux
+## 9. Rôle des fichiers principaux
 
 ### `importer_bdpm.py`
 
-Ce fichier sert à importer les données BDPM.
+Ce fichier prépare les données BDPM.
 
-Il réalise les étapes suivantes :
+Il réalise notamment :
 
-- décompresser les fichiers ZIP ;
-- lire les fichiers BDPM ;
-- détecter l’encodage ;
-- détecter le séparateur ;
-- nettoyer le HTML ;
-- extraire les sections des RCP ;
-- regrouper les informations par médicament ;
-- générer un corpus JSON.
+- la décompression des fichiers ZIP ;
+- la lecture des fichiers BDPM ;
+- la détection de l’encodage ;
+- la détection du séparateur ;
+- le nettoyage du HTML ;
+- l’extraction des sections RCP ;
+- le regroupement des informations par médicament ;
+- la génération du corpus JSON.
 
 Fichier généré :
 
@@ -345,15 +258,15 @@ data/medicaments_corpus_bdpm.json
 
 Ce fichier crée la base vectorielle.
 
-Il réalise les étapes suivantes :
+Il réalise :
 
-- charger le corpus JSON ;
-- transformer les sections en documents ;
-- découper les documents en chunks ;
-- calculer les embeddings ;
-- normaliser les vecteurs ;
-- créer un index FAISS ;
-- sauvegarder l’index et les chunks.
+- le chargement du corpus JSON ;
+- la transformation des sections en documents ;
+- le découpage en chunks ;
+- le calcul des embeddings ;
+- la normalisation des vecteurs ;
+- la création d’un index FAISS ;
+- la sauvegarde de l’index et des chunks.
 
 Fichiers générés :
 
@@ -365,19 +278,19 @@ storage/index_config.json
 
 ### `rag.py`
 
-Ce fichier permet d’utiliser le chatbot dans le terminal.
+Ce fichier permet d’utiliser l’assistant dans le terminal.
 
-Il réalise les étapes suivantes :
+Il réalise :
 
-- charger l’index FAISS ;
-- charger les chunks ;
-- charger le modèle d’embedding ;
-- transformer la question en vecteur ;
-- rechercher les chunks les plus proches ;
-- construire le contexte ;
-- appeler Groq ;
-- afficher la réponse ;
-- afficher les sources récupérées.
+- le chargement de l’index FAISS ;
+- le chargement des chunks ;
+- le chargement du modèle d’embedding ;
+- la vectorisation de la question ;
+- la recherche des chunks pertinents ;
+- la construction du contexte ;
+- l’appel au modèle Groq ;
+- l’affichage de la réponse ;
+- l’affichage des sources récupérées.
 
 ### `app_streamlit.py`
 
@@ -386,16 +299,18 @@ Ce fichier contient l’interface web.
 Il permet :
 
 - de poser une question dans une interface graphique ;
-- de récupérer les sources FAISS ;
-- d’afficher la réponse du chatbot ;
-- d’afficher les sources ;
-- d’afficher le score FAISS ;
-- d’ouvrir les fiches officielles BDPM ;
-- de consulter les extraits utilisés.
+- de filtrer par médicament ;
+- de rechercher par substance active ;
+- d’utiliser une recherche hybride FAISS + mots-clés ;
+- de comparer deux médicaments ;
+- de consulter l’historique de conversation ;
+- d’afficher les sources officielles ;
+- d’ouvrir les fiches BDPM ;
+- d’exporter les réponses en TXT ou PDF.
 
 ### `requirements.txt`
 
-Ce fichier contient les dépendances nécessaires au projet.
+Ce fichier contient les dépendances nécessaires.
 
 Exemple :
 
@@ -411,7 +326,82 @@ beautifulsoup4
 tqdm
 ```
 
-Important : il ne faut pas écrire de commandes comme `pip install streamlit` dans `requirements.txt`.
+Il ne faut pas écrire de commandes comme `pip install streamlit` dans `requirements.txt`. Il faut uniquement mettre le nom des bibliothèques.
+
+---
+
+## 10. Fonctionnalités implémentées
+
+### 10.1 Recherche sémantique avec FAISS
+
+La question est transformée en vecteur avec un modèle `sentence-transformers`, puis comparée aux vecteurs des chunks dans FAISS.
+
+### 10.2 Recherche hybride FAISS + mots-clés
+
+La version finale ajoute une recherche hybride. Elle combine :
+
+- le score sémantique FAISS ;
+- un score basé sur les mots-clés importants de la question ;
+- un bonus selon l’intention détectée ;
+- un bonus si la section médicale attendue correspond.
+
+Cette amélioration aide à mieux récupérer les sections importantes comme `4.2 Posologie`, `4.3 Contre-indications`, `4.5 Interactions` ou `4.8 Effets indésirables`.
+
+### 10.3 Filtre strict par médicament
+
+L’utilisateur peut sélectionner un médicament précis dans l’interface.
+
+Le filtre strict permet d’éviter que le système récupère un médicament proche mais différent.
+
+### 10.4 Recherche par substance active
+
+L’interface permet aussi de rechercher par substance active, par exemple :
+
+```text
+amoxicilline
+ibuprofène
+paracétamol
+```
+
+### 10.5 Détection d’intention
+
+Le système détecte l’intention de la question :
+
+- effets indésirables ;
+- posologie ;
+- contre-indications ;
+- interactions ;
+- information générale.
+
+Cette intention est utilisée pour enrichir la recherche et améliorer la pertinence des sources.
+
+### 10.6 Historique de conversation
+
+L’interface Streamlit conserve un historique des questions posées et des réponses générées pendant la session.
+
+### 10.7 Export TXT et PDF
+
+L’utilisateur peut télécharger :
+
+- la réponse en `.txt` ;
+- la réponse en `.pdf` ;
+- une comparaison entre deux médicaments en PDF.
+
+### 10.8 Tableau comparatif entre deux médicaments
+
+L’application permet de comparer deux médicaments sur un critère précis :
+
+- effets indésirables ;
+- posologie ;
+- contre-indications ;
+- interactions ;
+- information générale.
+
+La comparaison est générée uniquement à partir des sources récupérées.
+
+### 10.9 Liens vers les sources officielles BDPM
+
+Chaque source récupérée affiche un lien vers la fiche officielle BDPM lorsque le code CIS est disponible.
 
 ---
 
@@ -469,8 +459,6 @@ La clé API Groq ne doit jamais être publiée sur GitHub.
 
 ## 12. Tester l’installation
 
-Lancer :
-
 ```powershell
 python test_install.py
 ```
@@ -499,25 +487,25 @@ data/CIS_COMPO_bdpm.txt
 
 Ensuite lancer l’importation.
 
-Pour importer 1000 médicaments :
+Importer un nombre limité de médicaments :
 
 ```powershell
 python importer_bdpm.py --limit 1000
 ```
 
-Pour importer 10000 médicaments :
+Importer davantage de médicaments :
 
 ```powershell
 python importer_bdpm.py --limit 10000
 ```
 
-Pour importer tous les médicaments :
+Importer tous les médicaments :
 
 ```powershell
 python importer_bdpm.py --limit 0
 ```
 
-Pour filtrer sur un médicament précis :
+Filtrer sur un médicament précis :
 
 ```powershell
 python importer_bdpm.py --query amoxicilline --limit 20
@@ -561,21 +549,18 @@ Exemples de questions :
 
 ```text
 Quels sont les effets indésirables de l’amoxicilline ?
-```
-
-```text
 Quelle est la posologie de l’amoxicilline ?
-```
-
-```text
 Quelles sont les contre-indications de l’ibuprofène ?
-```
-
-```text
 C’est quoi le Doliprane ?
 ```
 
-Pour quitter : `quit` ou `exit`.
+Pour quitter :
+
+```text
+quit
+exit
+q
+```
 
 ---
 
@@ -585,7 +570,7 @@ Pour quitter : `quit` ou `exit`.
 streamlit run app_streamlit.py
 ```
 
-L’application s’ouvre dans le navigateur :
+L’application s’ouvre ensuite dans le navigateur :
 
 ```text
 http://localhost:8501
@@ -593,23 +578,24 @@ http://localhost:8501
 
 ---
 
-## 17. Déploiement en ligne avec Streamlit Cloud
+## 17. Déploiement avec Streamlit Cloud
 
 Le projet peut être déployé avec **Streamlit Community Cloud**.
 
-Étapes générales :
+Étapes :
 
 1. publier le projet sur GitHub ;
 2. aller sur Streamlit Community Cloud ;
 3. créer une nouvelle application ;
 4. choisir le dépôt GitHub ;
 5. choisir la branche `main` ;
-6. choisir le fichier principal : `app_streamlit.py` ;
-7. ajouter la clé API dans les secrets Streamlit.
+6. choisir le fichier principal `app_streamlit.py` ;
+7. ajouter les variables secrètes dans les secrets Streamlit ;
+8. lancer le déploiement.
 
 ---
 
-## 18. Gestion de la clé API en déploiement
+## 18. Gestion de la clé API
 
 Le fichier `.env` n’est pas envoyé sur GitHub pour des raisons de sécurité.
 
@@ -617,7 +603,7 @@ En local, la clé est lue depuis `.env`.
 
 En ligne, la clé est lue depuis les **Secrets** de Streamlit Cloud.
 
-Exemple de configuration dans Streamlit Secrets :
+Exemple dans Streamlit Secrets :
 
 ```toml
 GROQ_API_KEY = "gsk_xxxxxxxxxxxxxxxxxxxxxxxxx"
@@ -636,35 +622,17 @@ paraphrase-multilingual-mpnet-base-v2
 
 Ce vecteur représente le sens du texte.
 
-La question de l’utilisateur est aussi transformée en vecteur.
+La question de l’utilisateur est aussi transformée en vecteur. FAISS compare ensuite le vecteur de la question avec les vecteurs des chunks. Les chunks les plus proches sont récupérés et envoyés au modèle Groq.
 
-FAISS compare ensuite le vecteur de la question avec les vecteurs des chunks.
-
-Les chunks les plus proches sont récupérés et envoyés au LLM.
-
-Cela évite d’envoyer toute la base de données au modèle Groq.
+Cela évite d’envoyer toute la base de données au LLM.
 
 ---
 
-## 20. Modèle d’embedding utilisé
-
-Le modèle utilisé est :
-
-```text
-paraphrase-multilingual-mpnet-base-v2
-```
-
-Il est adapté aux textes en français et produit des vecteurs de dimension 768.
-
----
-
-## 21. Base vectorielle FAISS
+## 20. Base vectorielle FAISS
 
 Le projet utilise FAISS pour stocker et rechercher les embeddings.
 
-Les embeddings sont normalisés.
-
-L’index FAISS permet donc de comparer les textes avec une similarité proche de la similarité cosinus.
+Les embeddings sont normalisés. L’index FAISS permet donc de comparer les textes avec une similarité proche de la similarité cosinus.
 
 L’index est sauvegardé dans :
 
@@ -676,7 +644,7 @@ Cela évite de recalculer les embeddings à chaque lancement du chatbot.
 
 ---
 
-## 22. Modèle Groq utilisé
+## 21. Modèle Groq utilisé
 
 Le modèle Groq utilisé par défaut est :
 
@@ -695,35 +663,29 @@ Le LLM reçoit :
 
 ---
 
-## 23. Gestion anti-hallucination
+## 22. Mécanismes anti-hallucination
 
 Le projet contient plusieurs mécanismes pour limiter les hallucinations.
 
-### 23.1 Réponse basée uniquement sur le contexte
+### 22.1 Réponse basée uniquement sur le contexte
 
 Le prompt système interdit au modèle d’utiliser ses connaissances générales.
 
-### 23.2 Score FAISS
+### 22.2 Score de confiance
 
-Chaque source récupérée possède un score de similarité.
+Chaque source récupérée possède un score. Si le score est trop faible, l’assistant refuse de répondre au lieu d’inventer.
 
-Si le score de similarité est trop faible, l’assistant refuse de répondre au lieu d’inventer.
+### 22.3 Vérification des termes importants
 
-### 23.3 Vérification des termes importants
+Le système extrait les mots importants de la question. Si un médicament ou un terme important n’apparaît pas dans les sources récupérées, le système peut refuser de répondre.
 
-Le système extrait les mots importants de la question.
+### 22.4 Réduction du contexte envoyé au LLM
 
-Si un médicament ou un terme important n’apparaît pas dans les sources récupérées, le système peut refuser de répondre.
+Pour éviter les erreurs de limite de tokens, l’application n’envoie pas tout le contenu des sources au modèle. Elle extrait seulement les passages les plus pertinents autour des mots-clés de la question.
 
-### 23.4 Réduction du contexte envoyé au LLM
+### 22.5 Citation des sources
 
-Pour éviter les erreurs de limite de tokens avec Groq, l’application n’envoie pas tout le contenu des sources au LLM.
-
-Elle extrait uniquement les passages les plus pertinents autour des mots-clés de la question.
-
-### 23.5 Citation des sources
-
-Les réponses doivent citer les sources utilisées, avec :
+Les réponses doivent citer les sources utilisées avec :
 
 - le nom du médicament ;
 - la section ;
@@ -732,64 +694,27 @@ Les réponses doivent citer les sources utilisées, avec :
 
 ---
 
-## 24. Recherche orientée par intention
-
-Le système détecte l’intention de la question.
-
-### Effets indésirables
-
-Si la question contient des termes comme `effets indésirables`, `effets secondaires`, `nausées`, `réactions allergiques`, la recherche favorise la section :
-
-```text
-4.8 Effets indésirables
-```
-
-### Posologie
-
-Si la question contient des termes comme `posologie`, `dose`, `prendre`, `mode d’administration`, la recherche favorise la section :
-
-```text
-4.2 Posologie et mode d'administration
-```
-
-### Contre-indications
-
-Si la question contient des termes comme `contre-indication`, `allergie`, `ne pas prendre`, `interdit`, la recherche favorise la section :
-
-```text
-4.3 Contre-indications
-```
-
-### Interactions
-
-Si la question contient des termes comme `interaction`, `mélanger`, `associer`, `avec un autre médicament`, la recherche favorise la section :
-
-```text
-4.5 Interactions avec d'autres médicaments
-```
-
----
-
-## 25. Interface Streamlit
+## 23. Interface Streamlit finale
 
 L’interface Streamlit contient :
 
-- un champ de question ;
-- un bouton d’interrogation ;
-- des exemples de questions ;
-- un affichage de la réponse ;
-- les sources récupérées ;
-- les scores FAISS ;
-- les sections utilisées ;
-- les codes CIS ;
-- les liens vers les fiches officielles BDPM ;
-- les extraits utilisés.
+- une page d’accueil claire ;
+- un chatbot RAG ;
+- une recherche hybride ;
+- un filtre strict par médicament ;
+- une recherche par substance active ;
+- une page de comparaison entre deux médicaments ;
+- une page de recherche dans les sources ;
+- un historique de conversation ;
+- un export TXT et PDF ;
+- des liens vers les fiches officielles BDPM ;
+- l’affichage des scores et des extraits utilisés.
 
-L’objectif est de rendre le projet plus professionnel et plus simple à tester par l’enseignant.
+L’objectif est de rendre le projet facile à tester et plus professionnel pour la démonstration.
 
 ---
 
-## 26. Exemple de réponse
+## 24. Exemple de réponse
 
 Question :
 
@@ -802,12 +727,11 @@ Exemple de réponse attendue :
 ```text
 Les effets indésirables mentionnés dans les sources récupérées peuvent inclure :
 
+- troubles digestifs ;
 - nausées ;
-- vomissements ;
 - diarrhée ;
 - réactions cutanées ;
-- manifestations allergiques ;
-- troubles digestifs.
+- manifestations allergiques.
 
 Ces informations ne remplacent pas l'avis d'un professionnel de santé.
 En cas de doute, consultez votre médecin ou votre pharmacien.
@@ -819,26 +743,23 @@ Les sources affichées permettent ensuite de vérifier les informations :
 Médicament : AMOXICILLINE ...
 Section : 4.8 Effets indésirables
 Code CIS : ...
-Score FAISS : ...
+Score : ...
+Lien BDPM : ...
 ```
 
 ---
 
-## 27. Réponses aux questions de réflexion du sujet
+## 25. Réponses aux questions de réflexion du sujet
 
 ### Q1. Quelle stratégie de chunking pour les notices longues ?
 
-Les notices sont longues et contiennent plusieurs sections médicales.
-
-La stratégie utilisée consiste à extraire les sections importantes du RCP, puis à indexer ces sections sous forme de documents ou de chunks.
+Les notices sont longues et contiennent plusieurs sections médicales. La stratégie utilisée consiste à extraire les sections importantes du RCP, puis à découper ces sections en chunks.
 
 Cela permet de ne pas envoyer toute une notice au LLM.
 
 ### Q2. Comment exploiter la structure des notices ?
 
-Les notices/RCP contiennent des sections officielles.
-
-Le projet conserve ces sections dans les métadonnées :
+Les notices/RCP contiennent des sections officielles. Le projet conserve ces sections dans les métadonnées :
 
 ```json
 {
@@ -849,13 +770,11 @@ Le projet conserve ces sections dans les métadonnées :
 }
 ```
 
-Ces métadonnées sont utilisées pour améliorer la recherche, afficher les sources, justifier la réponse et créer des liens vers la BDPM.
+Ces métadonnées sont utilisées pour améliorer la recherche, afficher les sources et justifier la réponse.
 
 ### Q3. Comment distinguer effets secondaires, posologie et interactions ?
 
-Le projet utilise une fonction de détection d’intention.
-
-Selon les mots présents dans la question, le système enrichit la recherche vectorielle avec des termes liés à la section médicale attendue.
+Le projet utilise une fonction de détection d’intention. Selon les mots présents dans la question, le système enrichit la recherche vectorielle avec des termes liés à la section attendue.
 
 Exemples :
 
@@ -866,15 +785,13 @@ Exemples :
 
 ### Q4. Comment gérer une question sur deux médicaments ?
 
-Si l’utilisateur pose une question sur deux médicaments, FAISS recherche les passages proches de toute la question.
+L’application propose un onglet de comparaison entre deux médicaments. Le système récupère les sources pertinentes pour chaque médicament, puis demande au modèle Groq de produire une réponse comparative uniquement à partir des sources récupérées.
 
-Le modèle Groq ne répond qu’à partir des passages retrouvés.
-
-Si les sources ne contiennent pas d’information suffisante sur l’association des médicaments, le système doit répondre qu’il ne trouve pas l’information dans la base.
+Si les sources ne contiennent pas d’information suffisante, le système doit le signaler.
 
 ### Q5. Comment formuler un prompt prudent ?
 
-Le prompt système impose plusieurs règles :
+Le prompt système impose au modèle de :
 
 - ne pas inventer ;
 - ne pas utiliser les connaissances générales ;
@@ -885,7 +802,7 @@ Le prompt système impose plusieurs règles :
 
 ---
 
-## 28. Fichiers ignorés par Git
+## 26. Fichiers ignorés par Git
 
 Le fichier `.gitignore` empêche de publier :
 
@@ -899,20 +816,19 @@ data/*.csv
 data/bdpm_raw/
 data/medicaments_corpus_bdpm.json
 __pycache__/
-storage/
 ```
 
-Pour le déploiement Streamlit, certains fichiers de `storage/` peuvent être ajoutés volontairement avec :
+Pour le déploiement Streamlit, certains fichiers générés dans `storage/` peuvent être ajoutés volontairement avec :
 
 ```powershell
 git add -f storage/medicaments.index storage/chunks_medicaments.json storage/index_config.json
 ```
 
-Cela est utile si l’on veut éviter de refaire l’indexation en ligne.
+Cela permet à l’application en ligne de charger directement l’index sans refaire l’indexation.
 
 ---
 
-## 29. Problèmes rencontrés et solutions
+## 27. Problèmes rencontrés et solutions
 
 ### Problème 1 : `ModuleNotFoundError: No module named 'bs4'`
 
@@ -924,18 +840,20 @@ pip install beautifulsoup4
 
 ou vérifier que `beautifulsoup4` est bien dans `requirements.txt`.
 
-### Problème 2 : fichier `CIS_RCP.zip` introuvable
+### Problème 2 : fichier BDPM introuvable
 
-Solution : placer le fichier dans :
+Solution : placer les fichiers BDPM dans :
+
+```text
+data/
+```
+
+Exemples :
 
 ```text
 data/CIS_RCP.zip
-```
-
-ou adapter le nom dans le script si le fichier téléchargé s’appelle autrement, par exemple :
-
-```text
-cis-rcp.zip
+data/CIS_bdpm_officielle.zip
+data/CIS_COMPO_bdpm.txt
 ```
 
 ### Problème 3 : texte avec caractères mal encodés
@@ -948,70 +866,72 @@ Exemple :
 
 Solution : tester plusieurs encodages et utiliser celui qui donne un texte lisible.
 
-Le script teste notamment :
-
-```text
-utf-8-sig
-utf-8
-latin-1
-```
-
 ### Problème 4 : erreur Groq 413 / Request too large
 
 Cette erreur signifie que le contexte envoyé au modèle est trop grand.
 
 Solutions :
 
-- diminuer le nombre de sources FAISS ;
+- diminuer le nombre de sources ;
 - diminuer la taille maximale par source ;
 - envoyer uniquement les extraits pertinents ;
 - réduire `max_tokens`.
 
 ### Problème 5 : secrets absents sur Streamlit Cloud
 
-En ligne, le fichier `.env` n’est pas utilisé.
-
-Il faut ajouter les variables dans les secrets Streamlit :
+En ligne, le fichier `.env` n’est pas utilisé. Il faut ajouter les variables dans les secrets Streamlit :
 
 ```toml
 GROQ_API_KEY = "gsk_xxxxxxxxxxxxxxxxxxxxxxxxx"
 GROQ_MODEL = "llama-3.1-8b-instant"
 ```
 
+### Problème 6 : erreur dans `requirements.txt`
+
+Il ne faut pas écrire :
+
+```text
+pip install streamlit
+```
+
+dans `requirements.txt`.
+
+Il faut écrire seulement :
+
+```text
+streamlit
+```
+
 ---
 
-## 30. Limites du projet
+## 28. Limites du projet
 
 Le projet présente certaines limites :
 
 - la qualité des réponses dépend des données indexées ;
 - si un médicament n’est pas dans le corpus, le chatbot ne peut pas répondre ;
 - si une section est mal extraite, certaines informations peuvent manquer ;
-- la recherche vectorielle peut récupérer des médicaments proches mais non exacts ;
-- le modèle Groq peut parfois reformuler de manière imparfaite ;
+- la recherche vectorielle peut récupérer des médicaments proches ;
+- le modèle Groq peut reformuler de manière imparfaite ;
 - l’assistant ne remplace jamais un professionnel de santé.
 
 ---
 
-## 31. Améliorations possibles
+## 29. Améliorations futures possibles
 
-Plusieurs améliorations peuvent être ajoutées :
+Plusieurs améliorations peuvent encore être ajoutées :
 
-- ajouter une recherche hybride : FAISS + mots-clés ;
-- ajouter un filtre strict par nom de médicament ;
-- indexer toute la BDPM ;
-- améliorer le découpage des sections ;
-- ajouter une page d’accueil plus détaillée ;
-- ajouter un historique de conversation ;
-- ajouter un bouton d’export PDF ;
-- ajouter un tableau comparatif entre deux médicaments ;
-- ajouter une recherche par substance active ;
-- ajouter un mode sans LLM affichant uniquement les extraits officiels ;
-- améliorer encore le design Streamlit.
+- indexer une version encore plus complète de la BDPM ;
+- améliorer le découpage automatique des sections RCP ;
+- ajouter un mode de recherche avancée multicritère ;
+- ajouter une évaluation automatique de la qualité des réponses ;
+- ajouter un système de feedback utilisateur ;
+- ajouter une authentification pour un usage privé ;
+- ajouter une base vectorielle distante pour éviter de stocker l’index dans GitHub.
 
 ---
 
-## 32. Commandes principales
+## 30. Commandes principales
 
 Installation :
 
@@ -1047,13 +967,13 @@ streamlit run app_streamlit.py
 
 ---
 
-## 33. Auteur
+## 31. Auteur
 
 Projet réalisé par :
 
 ```text
 Billal Messaoui
-assem el abrak 
+Assem El Abrak
 ```
 
 Dans le cadre d’un TP sur la création d’un agent IA basé sur le RAG.
