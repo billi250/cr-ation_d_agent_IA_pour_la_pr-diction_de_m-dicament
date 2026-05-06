@@ -1178,6 +1178,107 @@ st.markdown(
             font-size: 2rem;
         }
     }
+
+
+    /* ============================================================
+       CORRECTION SIDEBAR — aucun bloc blanc / aucun texte invisible
+       ============================================================ */
+
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #111827 0%, #172033 45%, #0f172a 100%) !important;
+    }
+
+    section[data-testid="stSidebar"] > div {
+        background: transparent !important;
+    }
+
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] li {
+        color: #f8fafc !important;
+    }
+
+    section[data-testid="stSidebar"] [data-testid="stCaptionContainer"] *,
+    section[data-testid="stSidebar"] small {
+        color: #cbd5e1 !important;
+    }
+
+    /* Expander sidebar : fond sombre, pas gris clair */
+    section[data-testid="stSidebar"] div[data-testid="stExpander"],
+    section[data-testid="stSidebar"] div[data-testid="stExpander"] details,
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"] {
+        background: rgba(15, 23, 42, 0.72) !important;
+        border-color: rgba(255, 255, 255, 0.14) !important;
+        color: #f8fafc !important;
+    }
+
+    section[data-testid="stSidebar"] div[data-testid="stExpander"] summary {
+        background: rgba(17, 24, 39, 0.95) !important;
+        border-radius: 0.85rem 0.85rem 0 0 !important;
+    }
+
+    section[data-testid="stSidebar"] div[data-testid="stExpander"] summary *,
+    section[data-testid="stSidebar"] div[data-testid="stExpanderDetails"] *,
+    section[data-testid="stSidebar"] div[data-testid="stExpander"] label,
+    section[data-testid="stSidebar"] div[data-testid="stExpander"] p,
+    section[data-testid="stSidebar"] div[data-testid="stExpander"] span {
+        color: #f8fafc !important;
+    }
+
+    /* Inputs dans la sidebar : champ clair mais texte noir lisible */
+    section[data-testid="stSidebar"] div[data-baseweb="select"] > div,
+    section[data-testid="stSidebar"] input,
+    section[data-testid="stSidebar"] textarea {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        border: 1px solid rgba(148, 163, 184, 0.55) !important;
+    }
+
+    section[data-testid="stSidebar"] div[data-baseweb="select"] *,
+    section[data-testid="stSidebar"] div[data-baseweb="select"] span,
+    section[data-testid="stSidebar"] div[data-baseweb="select"] svg {
+        color: #0f172a !important;
+        fill: #0f172a !important;
+    }
+
+    /* Sliders dans la sidebar */
+    section[data-testid="stSidebar"] div[data-testid="stSlider"] *,
+    section[data-testid="stSidebar"] div[data-testid="stSlider"] label,
+    section[data-testid="stSidebar"] div[data-testid="stSlider"] span {
+        color: #f8fafc !important;
+    }
+
+    /* Métriques sidebar : carte sombre lisible */
+    section[data-testid="stSidebar"] div[data-testid="stMetric"] {
+        background: rgba(255, 255, 255, 0.09) !important;
+        border: 1px solid rgba(255, 255, 255, 0.16) !important;
+        border-radius: 1rem !important;
+        padding: 1rem !important;
+    }
+
+    section[data-testid="stSidebar"] div[data-testid="stMetric"] *,
+    section[data-testid="stSidebar"] div[data-testid="stMetricValue"] *,
+    section[data-testid="stSidebar"] div[data-testid="stMetricLabel"] * {
+        color: #f8fafc !important;
+    }
+
+    section[data-testid="stSidebar"] code {
+        color: #22c55e !important;
+        background: rgba(2, 6, 23, 0.78) !important;
+        border-radius: 0.35rem !important;
+        padding: 0.12rem 0.32rem !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+    }
+
+    section[data-testid="stSidebar"] .stAlert {
+        border-radius: 0.75rem !important;
+    }
+
     </style>
     """,
     unsafe_allow_html=True,
